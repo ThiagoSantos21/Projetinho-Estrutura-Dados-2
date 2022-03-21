@@ -15,7 +15,17 @@ typedef struct petshop{
     int idade;
     char raca[30];
     char sexo;
+    /* Sexo pode ser :
+        M: Masculino
+        F: Feminino
+    */
     char especie[20];
+    /* Espécie disponíveis :
+        Cachorro
+        Gato
+        Coelho
+        Lagarto
+    */
 };
 
 void carregar(petshop lista[],int *tam);
