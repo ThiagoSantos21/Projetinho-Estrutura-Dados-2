@@ -4,6 +4,14 @@
 // Thiago Travaglia 21001152
 // Guilherme Coutinho 21010202
 
+//Função 1 – Criar Índice Exaustivo + função QuichSort - PRONTO
+//Função 2 – Criar Índice Ordem Alfabética do Nome – usar o método BubbleSort dentro da própria função  - PRONTO
+//Função 3 – Criar Índice Secundário por Curso seguindo o Índice da Ordem Alfabética – DEVE ser usado um dos campos que tenham pelo menos 4 categorias. Não usar menos do que isso; - PRONTO
+//Função 4 – Busca aluno por RA usando a Busca Binária -> e imprime todos os dados do aluno – usar Índice criado na função1; - PRONTO
+//Função 5 – Imprime TODOS os dados de TODOS os Alunos por ordem crescente de RA – usa o Índice criado na função1; - PRONTO
+//Função 6 – Imprime TODOS os dados de TODOS os Alunos por ordem Alfabética de Nome– usa o Índice criado na função2; - PRONTO
+//Função 7 – Imprime TODOS os dados dos alunos de DETERMINADO CURSO – o curso a ser impresso deve ser pedido para o usuário escolher – usa o Índice criado na função3; - PRONT
+
 #include <iostream>
 #include <string.h>
 #include <sstream>
@@ -26,72 +34,138 @@ typedef struct petshop{
 
 };
 
-typedef struct indices{
-    char string[20];
+typedef struct indiceAlfabeto{
     int pos;
-    indices *prox;
+    indiceAlfabeto *prox;
 };
 
+typedef struct indiceRegistro{
+    char string[20];
+    int pos;
+};
+
+
+
 void carregarLista(petshop lista[],int *tam);
-int buscarRA(petshop lista[],int tam,char x[]);
+int  buscarRA(indiceRegistro indiceR[],int tam);
 void imprimirLista(petshop lista[],int tam);
-void carregarIndices(petshop lista[],indices indiceR[],indices**indiceA,int tam);
-void quickSort(indices indiceR[],int ini,int fim);
-void bubbleSort(indices **indiceA,int tam);
-int menu();
+void carregarIndiceA(petshop lista[],indiceAlfabeto**indiceA,int tam,int *pri);
+void imprimirIndiceA(petshop lista[],indiceAlfabeto*indiceA,int tam,int pri);
+void carregarIndiceEA(petshop lista[],indiceAlfabeto**indiceA,int tam,int *priEA);
+void imprimirIndiceEA(petshop lista[],indiceAlfabeto*indiceEA,int tam,int priEA[]);
+void carregarIndiceR(petshop lista[],indiceRegistro indiceR[],int tam);
+void imprimirIndiceR(petshop lista[],indiceRegistro indiceR[],int tam);
+void quickSort(indiceRegistro indiceR[],int ini,int fim);
+int  menu();
 
 int main(){
 
     int op,tam,a;
-    char x[20];
     petshop lista[80];
 
     //Indice do Registro
-    indices indiceR[80];
+    indiceRegistro indiceR[80];
 
-    //Indice do Alfabeto
-    indices *indiceA;
+    //Indice Ordem Alfabeto
+    indiceAlfabeto *indiceA;
+
+    //Indice Ordem Alfabetica por especie
+    indiceAlfabeto *indiceEA;
+
+    //Variavel PRI do indiceA
+    int pri;
+
+    //Variavel PRI do indiceEA
+    int priEA[4];
     
     carregarLista(lista,&tam);
-    carregarIndices(lista,indiceR,&indiceA,tam);
-
-    quickSort(indiceR,0,tam-1);
-    bubbleSort(&indiceA,tam-1);
-
-    printf("\n");
+    carregarIndiceR(lista,indiceR,tam);
+    carregarIndiceA(lista,&indiceA,tam,&pri);
+    carregarIndiceEA(lista,&indiceEA,tam,priEA);
 
     do{
         op = menu();
 
         switch(op){
             case 1:
-                printf("\nDigite o registro do animal : ");
-                scanf("%s",&x);
-
-                a = buscarRA(lista,tam,x);
-
-                if(a != -1) 
-                    printf("%s %s %d %c %s\n\n",lista[a].registro,lista[a].nome,lista[a].idade,lista[a].sexo,lista[a].especie);
-                else
-                    printf("Registro nao encontrado\n\n");
+                a = buscarRA(indiceR,tam);
+                a = indiceR[a].pos;
+                if(a != -1){
+                    printf("\nAnimal encontrado:\n");
+                    printf("Registro: %s\n",lista[a].registro);
+                    printf("Nome: %s\n",lista[a].nome);
+                    printf("Idade: %d\n",lista[a].idade);
+                    printf("Sexo: %c\n",lista[a].sexo);
+                    printf("Especie: %s\n",lista[a].especie);
+                }
+                system("pause");
+                system("cls");
                 break;
-            
             case 2:
                 imprimirLista(lista,tam);
+                printf("\n");
+                system("pause");
+                system("cls");
                 break;
+            case 3:
+                imprimirIndiceR(lista,indiceR,tam);
+                printf("\n");
+                system("pause");
+                system("cls");
+                break;
+            case 4:
+                imprimirIndiceA(lista,indiceA,tam,pri);
+                printf("\n");
+                system("pause");
+                system("cls");
+                break;
+            case 5:
+                imprimirIndiceEA(lista,indiceEA,tam,priEA);
+                printf("\n");
+                system("pause");
+                system("cls");
+                break;
+
         }
     }while(op !=0);
 
-    for(int i = 0;i<tam;i++){
-        printf("%s %d\n",indiceR[i].string,indiceR[i].pos);
+    /*printf("\n");
+    for(int i=0;i<tam;i++){
+        printf("%s\n",lista[indiceR[i].pos].registro);
     }
 
     printf("\n");
 
-    for(int i = 0;i<tam;i++){
-        printf("%s %d\n",indiceA->string,indiceA->pos);
-        indiceA = indiceA->prox;
+    int aux = pri;
+    indiceAlfabeto *auxi;
+
+    for(int i=0;i<tam;i++){
+        auxi = indiceA;
+        if(aux == -1)
+            break;
+        printf("%s\n",lista[aux].nome);
+        for(int j=0;j<aux;j++)
+            auxi = auxi->prox;
+        aux=auxi->pos;
     }
+
+    printf("\n");
+
+    for(int j=0;j<4;j++){
+        aux = priEA[j];
+        auxi = indiceEA;
+
+        for(int i=0;i<tam;i++){
+            auxi = indiceEA;
+            if(aux == -1)
+                break;
+            printf("%s\n",lista[aux].nome);
+            for(int j=0;j<aux;j++)
+                auxi = auxi->prox;
+            aux=auxi->pos;
+        }
+        printf("\n");
+    }*/
 
 }
 
@@ -186,39 +260,436 @@ void carregarLista(petshop lista[],int *tam){
     }
 }
 
-void bubbleSort(indices **indiceA,int tam){
+void carregarIndiceA(petshop lista[],indiceAlfabeto**indiceA,int tam,int *pri){
 
+    //Criação do Indice Alfabético 
+    for(int i = tam-1;i>=0;i--){
+
+        indiceAlfabeto* aux = (indiceAlfabeto*) malloc (sizeof(indiceAlfabeto));
+         
+        if (aux) {  
+            aux->pos = i;
+            aux->prox = NULL;
+            if (!(*indiceA)) { 
+                (*indiceA) = aux;
+                (*indiceA)->prox = NULL;
+            } 
+            else {
+                aux->prox = (*indiceA); 
+                (*indiceA) = aux;
+            }
+        }
+        else 
+            printf("Heap Overflow\n");
+    }
+
+    //BubbleSort - Ordem alfabética
     int teste = 1;
-    indices *aux,*aux2,*aux3;
-    int i,j;
-
-    aux = (indices*) malloc (sizeof(indices));
-    aux2= (indices*) malloc (sizeof(indices));
-    aux3= (indices*) malloc (sizeof(indices));
+    int i,j,pos;
+    indiceAlfabeto* x = (indiceAlfabeto*) malloc (sizeof(indiceAlfabeto));
 
     for(i=0;i<tam && teste;i++){
         teste=0;
-        aux = (*indiceA);
-        aux2 = aux->prox;
+        x = (*indiceA);
         for(j=0; j<tam-i;j++){
-            if((strcmp(aux->string,aux2->string))>0){
-                teste = 1;
-                strcpy(aux3->string,aux->string);
-                strcpy(aux->string,aux2->string);
-                strcpy(aux2->string,aux3->string);
-                aux3->pos = aux->pos;
-                aux->pos = aux2->pos;
-                aux2->pos = aux3->pos;
-            }
-            aux = aux->prox;
-            aux2 = aux2->prox;
-            if(aux == NULL)
+            if(x->prox == NULL){
                 break;
+            }
+            if((strcmp(lista[x->pos].nome,lista[x->prox->pos].nome))>0){
+                teste = 1;
+                pos = x->pos;
+                x->pos = x->prox->pos;
+                x->prox->pos = pos;
+            }
+            x = x->prox;
+        }
+    }
+
+    //Variável que irá percorrer a lista e fará a troca dos valores das posiçoes
+    indiceAlfabeto*a = (*indiceA);
+
+    //Tabela auxiliar -  será usada na organização da tabela
+    int auxt[80];
+
+    //Carregar a tabela auxiliar
+    for(int i=0;i<tam;i++){
+        auxt[i] = a->pos;
+        a = a->prox;
+    }
+
+    //Salvar o primeiro termo da tabela Invertida
+    (*pri) = auxt[0];
+
+    a = (*indiceA);
+
+
+    //Organizar os termos da tabela
+    for(i=0;i<tam;i++){
+        for(j=0;j!=auxt[i];j++)
+            a = a->prox;
+        if(i==79)
+            a->pos = -1;
+
+        else{
+            a->pos = auxt[i+1];
+            a = (*indiceA); 
         }
     }
 }
 
-void quickSort(indices indiceR[],int ini,int fim){
+void imprimirIndiceA(petshop lista[],indiceAlfabeto*indiceA,int tam,int pri){
+
+    char especie[20];
+    system("cls");
+    int pos = pri;
+    indiceAlfabeto* aux = indiceA;
+    int maiornome = 0;
+    int maiorespecie = 0;
+    int ra,espaco;
+
+    for(int i=0;i<tam;i++){
+        aux = indiceA;
+        if(maiornome < strlen(lista[pos].nome))
+            maiornome = strlen(lista[pos].nome);
+        if(pos == -1)
+            break;
+        for(int j=0;j<pos;j++)
+            aux = aux->prox;
+        pos=aux->pos;
+                
+    }
+
+    pos = pri;
+
+    for(int i=0;i<tam;i++){
+        aux = indiceA;
+        if(maiorespecie < strlen(lista[pos].especie))
+            maiorespecie = strlen(lista[pos].especie);
+        if(pos == -1)
+            break;
+        for(int j=0;j<pos;j++)
+            aux = aux->prox;
+        pos=aux->pos;  
+    }
+
+    pos = pri;
+
+    printf("RA|Nome");
+    for(int i=0;i<maiornome-4;i++){
+        printf(" ");
+    }      
+    printf("|Idade|Sexo|Especie |\n");
+    for(int i=0;i<tam;i++){
+        aux = indiceA;
+        if(pos == -1)
+            return;
+                
+        //Impressão do Registro
+        printf("%s|",lista[pos].registro);
+
+        //Impressão do nome
+        espaco = maiornome - strlen(lista[pos].nome);
+        printf("%s",lista[pos].nome);
+        for(int j=0;j<espaco;j++)
+            printf(" ");
+        printf("|");
+
+        //Impressão da idade
+        printf("%d",lista[pos].idade);
+        if(lista[pos].idade < 10)
+            printf("    |");
+        else
+            printf("   |");
+
+        //Impressão do Sexo
+        printf("%c   |",lista[pos].sexo);
+
+        //Impressão da Especie
+        espaco = maiorespecie - strlen(lista[pos].especie);
+        printf("%s",lista[pos].especie);
+        for(int j=0;j<espaco;j++)
+            printf(" ");
+        printf("|\n");
+
+        for(int j=0;j<pos;j++)
+            aux = aux->prox;
+        pos=aux->pos;
+
+    }
+}
+
+void carregarIndiceEA(petshop lista[],indiceAlfabeto**indiceEA,int tam,int *priEA){
+
+    //Criação do Indice Especie Alfabético 
+    for(int i = tam-1;i>=0;i--){
+
+        indiceAlfabeto* aux = (indiceAlfabeto*) malloc (sizeof(indiceAlfabeto));
+         
+        if (aux) {  
+            aux->pos = i;
+            aux->prox = NULL;
+            if (!(*indiceEA)) { 
+                (*indiceEA) = aux;
+                (*indiceEA)->prox = NULL;
+            } 
+            else {
+                aux->prox = (*indiceEA); 
+                (*indiceEA) = aux;
+            }
+        }
+        else 
+            printf("Heap Overflow\n");
+    }
+
+    //BubbleSort - Ordem alfabética
+    int teste = 1;
+    int i,j,pos;
+    indiceAlfabeto* x = (indiceAlfabeto*) malloc (sizeof(indiceAlfabeto));
+
+    for(i=0;i<tam && teste;i++){
+        teste=0;
+        x = (*indiceEA);
+        for(j=0; j<tam-i;j++){
+            if(x->prox == NULL){
+                break;
+            }
+            if((strcmp(lista[x->pos].nome,lista[x->prox->pos].nome))>0){
+                teste = 1;
+                pos = x->pos;
+                x->pos = x->prox->pos;
+                x->prox->pos = pos;
+            }
+            x = x->prox;
+        }
+    }
+
+    //Variável que irá percorrer a lista e fará a troca dos valores das posiçoes
+    indiceAlfabeto*a = (*indiceEA);
+
+    //Tabela auxiliar -  será usada na organização da tabela
+    int auxt[80];
+
+    //Carregar a tabela auxiliar
+    for(int i=0;i<tam;i++){
+        auxt[i] = a->pos;
+        a = a->prox;
+    }
+
+
+    //Inicializando o priEA
+    for(i=0;i<4;i++){
+        priEA[i] = -1;
+    }
+
+    //Salvar os primeiros termos da tabela secundária
+    for(i=0,j=0;i<4;i++){
+        teste = 0;
+        
+        while(teste != 1 || j>tam){
+            if (i != 0) {
+                for(int k=0,l=i;k<i;k++){
+                    if(priEA[i] == -1 ){
+                        if((strcmp(lista[priEA[k]].especie,lista[auxt[j]].especie)) != 0){
+                            l--;
+                        }
+                    }
+
+                    if(l == 0){
+                        priEA[i] = auxt[j];
+                        teste = 1;
+                    }
+                }
+            } else {
+                priEA[i] = auxt[j];
+                teste = 1;
+            }
+            j++;   
+        }
+    }
+
+    a = (*indiceEA);
+
+
+    //Organizar os termos da tabela
+    for(i=0;i<4;i++){
+        int pos = priEA[i];
+        for(j=0;j<tam;j++){
+            if((strcmp(lista[pos].especie,lista[auxt[j]].especie)) == 0 && (strcmp(lista[pos].nome,lista[auxt[j]].nome)) != 0 ){
+                for(int k = 0;k<pos;k++){
+                    a = a->prox;
+                }
+                pos = auxt[j];
+                a->pos = auxt[j];
+            }
+            a = (*indiceEA);
+        }
+
+        for(int k = 0;k<pos;k++){
+            a = a->prox;
+        }
+        a->pos = -1;
+
+        pos = priEA[i];
+
+        for(int m=0;m<tam;m++){
+            if(pos == -1)
+                break;
+            a = (*indiceEA);
+            for(int n=0;n<pos;n++)
+                a = a->prox;
+            pos=a->pos;
+        }
+    }
+}
+
+void imprimirIndiceEA(petshop lista[],indiceAlfabeto*indiceEA,int tam,int priEA[]){
+
+    char especie[20];
+    int teste;
+    int maiorespecie = strlen(lista[priEA[0]].especie);
+    printf("\nDigite a especie (Cachorro,Gato,Coelho,Passaro):\n");
+    scanf("%s",&especie);
+    system("cls");
+
+    for(int i=0;i<4 && teste;i++){
+        int pos = priEA[i];
+        if((strcmp(lista[pos].especie,especie)) == 0){
+            teste = 1;
+            indiceAlfabeto* aux = indiceEA;
+            int maiornome = 0;
+            int ra,espaco;
+
+            for(int i=0;i<tam;i++){
+                aux = indiceEA;
+                if(maiornome < strlen(lista[pos].nome))
+                    maiornome = strlen(lista[pos].nome);
+                if(pos == -1)
+                    break;
+                for(int j=0;j<pos;j++)
+                    aux = aux->prox;
+                pos=aux->pos;
+                
+            }
+
+            pos = priEA[i];
+
+            printf("RA|Nome");
+            for(int i=0;i<maiornome-4;i++){
+                printf(" ");
+            }      
+            printf("|Idade|Sexo|Especie |\n");
+            for(int i=0;i<tam;i++){
+                aux = indiceEA;
+                if(pos == -1)
+                    return;
+                
+                //Impressão do Registro
+                printf("%s|",lista[pos].registro);
+
+                //Impressão do nome
+                espaco = maiornome - strlen(lista[pos].nome);
+                printf("%s",lista[pos].nome);
+                for(int j=0;j<espaco;j++)
+                    printf(" ");
+                printf("|");
+
+                //Impressão da idade
+                printf("%d",lista[pos].idade);
+                if(lista[pos].idade < 10)
+                    printf("    |");
+                else
+                    printf("   |");
+
+                //Impressão do Sexo
+                printf("%c   |",lista[pos].sexo);
+
+                //Impressão da Especie
+                espaco = maiorespecie - strlen(lista[pos].especie);
+                printf("%s",lista[pos].especie);
+                for(int j=0;j<espaco;j++)
+                    printf(" ");
+                printf("|\n");
+
+                for(int j=0;j<pos;j++)
+                    aux = aux->prox;
+                pos=aux->pos;
+
+            }
+        }
+    }
+    
+    if(teste == 1)
+        return;
+    else
+        printf("Especie nao encontrada\n");
+    
+
+}
+    
+void carregarIndiceR(petshop lista[],indiceRegistro indiceR[],int tam){
+
+    for(int i = 0;i<tam;i++){
+        strcpy(indiceR[i].string,lista[i].registro);
+        indiceR[i].pos=i;
+    }
+
+    quickSort(indiceR,0,tam-1);
+}
+
+void imprimirIndiceR(petshop lista[],indiceRegistro indiceR[],int tam){
+
+    int maiornome = 0;
+    int maiorespecie = 0;
+    int ra,espaco;
+
+    system("cls");
+
+    for(int i=0;i<tam;i++){
+        if(maiornome < strlen(lista[indiceR[i].pos].nome))
+            maiornome = strlen(lista[indiceR[i].pos].nome);
+    }
+
+    for(int i=0;i<tam;i++){
+        if(maiorespecie < strlen(lista[indiceR[i].pos].especie))
+            maiorespecie = strlen(lista[indiceR[i].pos].especie);
+    }
+
+    printf("RA|Nome       |Idade|Sexo|Especie |\n");
+    for(int i=0;i<tam;i++){
+
+        if(i == 80)
+            return;
+        
+        //Impressão do Registro
+        printf("%s|",lista[indiceR[i].pos].registro);
+
+        //Impressão do nome
+        espaco = maiornome - strlen(lista[indiceR[i].pos].nome);
+        printf("%s",lista[indiceR[i].pos].nome);
+        for(int j=0;j<espaco;j++)
+            printf(" ");
+        printf("|");
+
+        //Impressão da idade
+        printf("%d",lista[indiceR[i].pos].idade);
+        if(lista[indiceR[i].pos].idade < 10)
+            printf("    |");
+        else
+            printf("   |");
+
+        //Impressão do Sexo
+        printf("%c   |",lista[indiceR[i].pos].sexo);
+
+        //Impressão da Especie
+        espaco = maiorespecie - strlen(lista[indiceR[i].pos].especie);
+        printf("%s",lista[indiceR[i].pos].especie);
+        for(int j=0;j<espaco;j++)
+            printf(" ");
+        printf("|\n");
+    }
+}
+
+void quickSort(indiceRegistro indiceR[],int ini,int fim){
 
     int flag = 1,i,j;
     char aux[20];
@@ -252,34 +723,6 @@ void quickSort(indices indiceR[],int ini,int fim){
 
 }
 
-void carregarIndices(petshop lista[],indices indiceR[],indices**indiceA,int tam){
-
-    for(int i = 0;i<tam;i++){
-        strcpy(indiceR[i].string,lista[i].registro);
-        indiceR[i].pos=i;
-    }
-
-    for(int i = 0;i<tam;i++){
-        indices* aux = (indices*) malloc (sizeof(indices)); 
-        if (aux) {  
-            strcpy(aux->string,lista[i].nome);
-            aux->pos = i;
-            aux->prox = NULL;
-            if (!(*indiceA)) { 
-                (*indiceA) = aux;
-                (*indiceA)->prox = NULL;
-            } 
-            else {
-                aux->prox = (*indiceA); 
-                (*indiceA) = aux;
-            }
-        }
-        else 
-            printf("Heap Overflow\n");
-    }
-    
-}
-
 int menu(){
 
     int op;
@@ -288,22 +731,43 @@ int menu(){
         printf("======PETSHOP======\n\n");
         printf("1 - Buscar um animal\n");
         printf("2 - Imprimir animais\n");
+        printf("3 - Imprimir animais em ordem do registro\n");
+        printf("4 - Imprimir animais em ordem alfabetica\n");
+        printf("5 - Imprimir animais em ordem alfabetica de apenas uma especie\n");
         printf("0 - Sair\n");
         printf("Opcao : ");
         scanf("%d",&op);
         fflush(stdin);
 
-        if(op < 0 || op > 2)
+        if(op < 0 || op > 5)
             printf("Opcao invalida\n");
         else
             return op;
     }
 }
 
-int buscarRA (petshop lista[],int tam,char x[]){
+int buscarRA (indiceRegistro indiceR[],int tam){
 
-    for(int i=0;i<tam;i++)
-        if((strcmp(lista[i].registro,x))==0) return i;
+    int sup = tam-1, inf = 0;
+    int meio;
+    char x[20];
+    system("cls");
+
+    printf("Digite o registro: ");
+    scanf("%[^\n]",&x);
+
+    while(inf<=sup){
+        meio = (sup+inf)/2;
+        if((strcmp(indiceR[meio].string,x))==0){
+            return meio;
+        }
+        if((strcmp(indiceR[meio].string,x))<0){
+            inf = meio+1;
+        }
+        else{
+            sup = meio-1;
+        }
+    }
     return -1;
     
 }
@@ -313,6 +777,8 @@ void imprimirLista(petshop lista[],int tam){
     int maiornome = 0;
     int maiorespecie = 0;
     int ra,espaco;
+
+    system("cls");
 
     for(int i=0;i<tam;i++){
         if(maiornome < strlen(lista[i].nome))
@@ -324,17 +790,13 @@ void imprimirLista(petshop lista[],int tam){
             maiorespecie = strlen(lista[i].especie);
     }
 
-    printf("\nRA|Nome       |Idade|Raca                 |Sexo|Especie |\n");
+    printf("RA|Nome       |Idade|Sexo|Especie |\n");
     for(int i=0;i<tam;i++){
 
         if(i == 80)
             return;
         
         //Impressão do Registro
-        ra = stoi(lista[i].registro);
-
-        if(ra < 10)
-            printf("0");
         printf("%s|",lista[i].registro);
 
         //Impressão do nome
@@ -359,6 +821,6 @@ void imprimirLista(petshop lista[],int tam){
         printf("%s",lista[i].especie);
         for(int j=0;j<espaco;j++)
             printf(" ");
-        printf("|\n\n");
+        printf("|\n");
     }
 }
