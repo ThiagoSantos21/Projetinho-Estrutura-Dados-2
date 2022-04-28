@@ -1,9 +1,3 @@
-// Thiago Lima Santos 21012009
-// Wirrley Ferreira Santos 21008641
-// Joao Vitor de Faria e Souza 20017026
-// Thiago Travaglia 21001152
-// Guilherme Coutinho 21010202
-
 //Função 1 – Criar Índice Exaustivo + função QuichSort - PRONTO
 //Função 2 – Criar Índice Ordem Alfabética do Nome – usar o método BubbleSort dentro da própria função  - PRONTO
 //Função 3 – Criar Índice Secundário por Curso seguindo o Índice da Ordem Alfabética – DEVE ser usado um dos campos que tenham pelo menos 4 categorias. Não usar menos do que isso; - PRONTO
